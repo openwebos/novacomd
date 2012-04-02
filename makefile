@@ -34,11 +34,12 @@ endif
 
 # compiler flags, default libs to link against
 MYCFLAGS := -Wall -W -Wno-multichar -Wno-unused-parameter -Wno-unused-function -g -O2 -Iinclude -DBUILDVERSION=$(BUILDVERSION) 
+CFLAGS :=
 # pull in the machine build name version from OE if it's set
 ifneq ($(MACHINE),)
 MYCFLAGS += -DMACHINE=\"$(MACHINE)\"
 endif
-HOSTCFLAGS := $(MYCFLAGS) -Isrc
+HOSTCFLAGS := $(MYCFLAGS) $(CFLAGS) -Isrc
 DEVICECFLAGS := $(MYCFLAGS) $(OECFLAGS) $(TARGET_CC_ARCH) -DPLATFORM_PTHREADS=1
 CPPFLAGS := -g
 ASMFLAGS :=
