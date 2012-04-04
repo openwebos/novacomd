@@ -733,7 +733,6 @@ static int main_loop(void)
 			struct active_device *temp_dev;
 			/* device */
 			if (FD_ISSET(dev->socket, &fds) ) {
-				int err;
 				SOCKET newsocket = accept_socket(dev->socket);
 				TRACEL(LOG_TRACE, "data socket %d\n", newsocket);
 
@@ -741,7 +740,7 @@ static int main_loop(void)
 
 					// Set non-blocking or novacomd will drop offline if the socket fills up
 					fcntl(newsocket, F_SETFL, fcntl(newsocket, F_GETFL) | O_NONBLOCK);
-					err = novacom_register_client(dev, newsocket);
+					novacom_register_client(dev, newsocket);
 				}
 			}
 
