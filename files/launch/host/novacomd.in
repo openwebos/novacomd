@@ -15,31 +15,15 @@
 #* limitations under the License.
 #*
 #* LICENSE@@@ */
-start on stopped bootmisc
-respawn
-normal exit 0 TERM
+# novacomd
+#
+
+start on runlevel 2
+start on runlevel 3
+start on runlevel 4
+start on runlevel 5
 
 console output
 
-service
-
-env UPSTART_JOB
-env UPSTART_JOB_ID
-env UPSTART_EVENT
-
-script
-if [ -e /var/gadget/novacom_enabled ]; then
-
-   if [ ! -d /dev/gadget ]
-   then
-	   # This is where we will mount the gadgetfs
-	   mkdir /dev/gadget
-
-	   # Mount it
-	   mount -tgadgetfs none /dev/gadget || true
-   fi
-   
-   exec /sbin/novacomd > /dev/null
-fi
-
-end script
+respawn
+exec @WEBOS_INSTALL_BASE_SBINDIR@/novacomd
