@@ -42,16 +42,27 @@ file(GLOB novacom_files src/novacom/*.c)
 
 # Device and host have different sources
 if(${WEBOS_TARGET_MACHINE_IMPL} STREQUAL host)
+	pkg_check_modules(LIBUSB REQUIRED libusb)
+	include_directories(${LIBUSB_INCLUDE_DIRS})
+	webos_add_compiler_flags(ALL ${LIBUSB_CFLAGS_OTHER})
+
 	file(GLOB target_files src/host/*.c)
 	webos_add_compiler_flags(ALL -DHOST=1)
 	set(upstartfile files/launch/host/novacomd)
 else()
-	webos_machine_dep()
+	pkg_check_modules(NYXLIB REQUIRED nyx)
+	include_directories(${NYXLIB_INCLUDE_DIRS})
+	webos_add_compiler_flags(ALL ${NYXLIB_CFLAGS_OTHER})
+
 	file(GLOB target_files src/device/*.c)
 	list(APPEND target_files src/platform_pthreads.c)
 	webos_add_compiler_flags(ALL -DDEVICE=1)
-	add_definitions(-DMACHINE="${WEBOS_TARGET_MACHINE}")
-	set(upstartfile files/launch/device/novacomd)
+
+	if(${WEBOS_TARGET_MACHINE_IMPL} STREQUAL emulator)
+		set(upstartfile files/launch/emulator/novacomd)
+	else()
+		set(upstartfile files/launch/device/novacomd)
+	endif()
 endif()
 
 # device build gets ${device_files} and src/platform_pthreads.c
@@ -69,10 +80,9 @@ add_executable(novacomd ${lib_files}
 
 # Link against the libusb of host system when building standalone
 if(${WEBOS_TARGET_MACHINE_IMPL} STREQUAL host)
-	pkg_check_modules(LIBUSB REQUIRED libusb)
-	include_directories(${LIBUSB_INCLUDE_DIRS})
-	webos_add_compiler_flags(ALL ${LIBUSB_CFLAGS_OTHER})
 	target_link_libraries(novacomd ${LIBUSB_LIBRARIES})
+else()
+	target_link_libraries(novacomd ${NYXLIB_LDFLAGS})
 endif()
 
 target_link_libraries(novacomd pthread)

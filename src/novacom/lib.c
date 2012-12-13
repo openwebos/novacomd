@@ -25,6 +25,9 @@
 
 #include <platform.h>
 #include <novacom.h>
+#ifndef WEBOS_TARGET_MACHINE_IMPL_HOST
+#include <nyx/nyx_client.h>
+#endif
 #include "novacom_p.h"
 
 static char nduid[NOVACOM_NDUID_STRLEN];
@@ -33,21 +36,39 @@ void novacom_nduid_init(void)
 {
 	int i;
 
+	//initialize nduid for cases nyx-lib is not usable
 	for (i=0; i < NOVACOM_NDUID_CHRLEN; i++) {
 		nduid[i] = "0123456789abcdef"[rand() & 0xf];
 	}
+	nduid[NOVACOM_NDUID_CHRLEN] = '\0';
 
-	int fd;
-	// if /proc/nduid doesn't exist, this will just fail through and leave the random nduid
-	fd = open("/proc/nduid", O_RDONLY);
-	if (fd >= 0) {
-		i = read(fd, nduid, NOVACOM_NDUID_CHRLEN);	/*ignore return, fail through with random id*/
-		close(fd);
+#ifndef WEBOS_TARGET_MACHINE_IMPL_HOST
+	nyx_device_handle_t device = NULL;
+	nyx_error_t error = NYX_ERROR_NONE;
+
+	error = nyx_init();
+
+	if(NYX_ERROR_NONE == error)
+	{
+		error = nyx_device_open(NYX_DEVICE_DEVICE_INFO, "Main", &device);
+
+		if(NULL != device && NYX_ERROR_NONE == error)
+		{
+			// Error value left unchecked on purpose. If NDUID reading fails for
+			// some reason, initialized value is used.
+			nyx_device_info_get_info(device, NYX_DEVICE_INFO_NDUID, nduid,
+			                         NOVACOM_NDUID_STRLEN);
+
+			nyx_device_close(device);
+		}
+
+		nyx_deinit();
 	}
-	nduid[NOVACOM_NDUID_CHRLEN] = 0;
+
+#endif // !WEBOS_TARGET_MACHINE_IMPL_HOST
 }
 
-char * novacom_nduid(void)
+const char * novacom_nduid(void)
 {
 	return nduid;
 }

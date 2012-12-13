@@ -15,15 +15,19 @@
 #* limitations under the License.
 #*
 #* LICENSE@@@ */
-# novacomd
-#
-
-start on runlevel 2
-start on runlevel 3
-start on runlevel 4
-start on runlevel 5
+start on stopped bootmisc
+respawn
+normal exit 0 TERM
 
 console output
 
-respawn
-exec @WEBOS_INSTALL_BASE_SBINDIR@/novacomd -b
+service
+
+env UPSTART_JOB
+env UPSTART_JOB_ID
+env UPSTART_EVENT
+
+script
+	export ip_addr=$(ip route show | grep default | awk '{print $3}')
+	exec @WEBOS_INSTALL_BASE_SBINDIR@/novacomd --connect-ip $ip_addr > /dev/null
+end script

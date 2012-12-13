@@ -3,7 +3,7 @@ novacomd
 
 Summary
 -------
-Utility to communicate with an embedded device over USB or TCP/IP
+Utility to communicate with a target device over USB or TCP/IP
 
 Description
 -----------
@@ -22,8 +22,9 @@ build _novacomd_:
 - cmake (version required by openwebos/cmake-modules-webos)
 - gcc 4.6.3
 - glib-2.0 2.32.1
-- libusb 1.0.0
+- libusb 1.0.0 (needed only for the host build)
 - openwebos/cmake-modules-webos 1.0.0 RC4
+- openwebos/nyx-lib 3.0.0 RC1 (needed only for non-host builds)
 - pkg-config 0.26
 
 ## Building

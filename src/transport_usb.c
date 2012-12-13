@@ -32,6 +32,7 @@
 #include "novacom/novacom_p.h"
 #if DEVICE
 #include "device/auth.h"
+#include <nyx/nyx_client.h>
 #endif
 
 #include "transport.h"
@@ -229,13 +230,43 @@ novacom_usbll_handle_t novacom_usbll_create(const char *devtype, uint32_t max_mt
 
 #if DEVICE
 		int n = 0;
-#ifdef MACHINE
-		/* device id */
-		snprintf(usbll_handle->device_id, sizeof(usbll_handle->device_id), "%s%s-linux", NOVACOMD_DATATOKEN_ID, MACHINE);
-		n = strlen(usbll_handle->device_id) + 1;
-#else
+		// initialize device_id first
 		usbll_handle->device_id[0] = 0; /* clear string */
-#endif
+
+		/* device id */
+		nyx_device_handle_t device = NULL;
+		nyx_error_t error = NYX_ERROR_NONE;
+		error = nyx_init();
+
+		if(error == NYX_ERROR_NONE)
+		{
+			error = nyx_device_open(NYX_DEVICE_DEVICE_INFO, "Main", &device);
+
+			if(device != NULL)
+			{
+				// use 'sizeof(usbll_handle->device_id)' for device name max length
+				char retVal[sizeof(usbll_handle->device_id)];
+
+				error = nyx_device_info_get_info(device, NYX_DEVICE_INFO_DEVICE_NAME,
+				                                 retVal, sizeof(usbll_handle->device_id));
+
+				if(NYX_ERROR_NONE != error)
+				{
+					TRACEL(LOG_ERROR, "nyx_device_info_get_info failed, using (unknown) as name\n");
+					// Not able to get device name so using "(unknown)"
+					sprintf(retVal, "(unknown)");
+				}
+
+				snprintf(usbll_handle->device_id, sizeof(usbll_handle->device_id),
+				         "%s%s-linux", NOVACOMD_DATATOKEN_ID, retVal);
+				n = strlen(usbll_handle->device_id) + 1;
+
+				nyx_device_close(device);
+			}
+		}
+
+		nyx_deinit();
+
 		/* session id */
 		if( !auth_is_done() ) {
 			int rc;

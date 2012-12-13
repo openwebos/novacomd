@@ -59,7 +59,7 @@ extern int g_usbio_retry_timeout;
 extern int g_usbio_retry_delay;
 extern int g_cpuaffinity;
 /* */
-char * novacom_nduid(void); /* internal nduid */
+const char * novacom_nduid(void); /* internal nduid */
 char * novacom_rnduid(device_handle_t device_handle); /* remote nduid */
 int novacom_init(void); // called once per session
 uint32_t novacom_get_new_sessionid();
