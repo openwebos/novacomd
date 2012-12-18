@@ -341,7 +341,7 @@ static int set_usb_online(bool on)
 			close(ep2out_fd);
 			LOG_PRINTF("closed rx_thread\n");
 			novacom_usbll_destroy(usbll_handle);
-			LOG_PRINTF("destroied novacom usbll_handle\n");
+			LOG_PRINTF("destroyed novacom usbll_handle\n");
 
 			/* clear auth */
 			auth_reset();
@@ -358,6 +358,13 @@ int novacom_usb_transport_init(void)
 	return 0;
 }
 
+// unknown _why_ we're retrying these opens, but assuming that there was a _real_
+// reason I'll leave it in but with a sane number of retries
+//
+// It seems unnecessary to try more than once but trying 5 times because previously
+// the code tried forever.
+
+#define GADGET_RETRY_COUNT 5
 static void *ep0_thread(void *arg)
 {
 	device_pthread_setaffinity();
@@ -368,6 +375,7 @@ static void *ep0_thread(void *arg)
 	int rc;
 
 	LOG_PRINTF("entry: self %ld\n", syscall(SYS_gettid));
+	rc = 0; 	// re-use rc as a loop counter
 retry:
 	/* novacom_ep0 */
 	ep0_fd = open("/dev/novacom_ep0", O_RDWR);
@@ -414,6 +422,12 @@ retry:
 	}
 
 	/* fail */
+	rc++;
+	if (rc >= GADGET_RETRY_COUNT) {
+		log_printf(LOG_ERROR, "failed to open gadgetfs %d times - giving up on usb\n", rc);
+		return (NULL);
+	}
+
 	log_printf(LOG_ERROR, "failed to open gadgetfs ep0 node - retry\n");
 	sleep(1);
 	goto retry;

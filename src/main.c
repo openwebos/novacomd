@@ -131,9 +131,9 @@ static struct active_device *device_list;
 static void add_device_ref(struct active_device *dev);
 static void remove_device_ref(struct active_device *dev);
 static int socketchan_read_callback(device_handle_t device_handle, uint32_t channel, int error, const void *buf, size_t len, void *cookie);
+static void socketchan_write_callback(device_handle_t device_handle, uint32_t channel, int err, void *cookie);
 static void destroy_socketchan(socketchan_t *sc);
 static int novacom_register_client(active_device_t *dev, SOCKET newsocket);
-static int novacom_process_cmdqueue(active_device_t *dev);
 
 int handleopt(const char *opt, const char *val);
 int getnextopt(int argc, char **argv, const char **opt, const char **val);
@@ -141,10 +141,11 @@ int getnextopt(int argc, char **argv, const char **opt, const char **val);
 #if HOST
 void *novacom_deviceinit_thread(void *arg);
 static int novacom_register_command(SOCKET cmdsocket, const char *_cmd);
+static int novacom_process_cmdqueue(active_device_t *dev);
 static int socketcmd_read_callback(device_handle_t device_handle, uint32_t channel, int err, const void *buf, size_t len, void *cookie);
 static void destroy_socketcmd(socketcmd_t *sc);
+void socketcmd_write_callback(device_handle_t device_handle, uint32_t channel, int err, void *cookie);
 #endif
-
 
 void usage(void)
 {
@@ -733,7 +734,6 @@ static int main_loop(void)
 			struct active_device *temp_dev;
 			/* device */
 			if (FD_ISSET(dev->socket, &fds) ) {
-				int err;
 				SOCKET newsocket = accept_socket(dev->socket);
 				TRACEL(LOG_TRACE, "data socket %d\n", newsocket);
 
@@ -741,7 +741,7 @@ static int main_loop(void)
 
 					// Set non-blocking or novacomd will drop offline if the socket fills up
 					fcntl(newsocket, F_SETFL, fcntl(newsocket, F_GETFL) | O_NONBLOCK);
-					err = novacom_register_client(dev, newsocket);
+					(void) novacom_register_client(dev, newsocket);
 				}
 			}
 
@@ -1095,7 +1095,10 @@ int main(int argc, char **argv)
 	}
 #else
 	/* run at slightly higher priority, but less so than the kernel threads */
-	nice(-4);
+	err = nice(-4);
+	if ( -4 != err) {
+		TRACEL(LOG_ERROR, "nice(-4) returned an incorrect value: %d\n", err);
+	}
 #endif
 #endif
 
