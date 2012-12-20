@@ -1096,8 +1096,8 @@ int main(int argc, char **argv)
 #else
 	/* run at slightly higher priority, but less so than the kernel threads */
 	err = nice(-4);
-	if ( -4 != err) {
-		TRACEL(LOG_ERROR, "nice(-4) returned an incorrect value: %d\n", err);
+	if (-4 != err) {
+		TRACEL(LOG_ERROR, "nice(-4) returned an unexpected value: %d\n", err);
 	}
 #endif
 #endif

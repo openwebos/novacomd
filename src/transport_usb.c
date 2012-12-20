@@ -254,7 +254,7 @@ novacom_usbll_handle_t novacom_usbll_create(const char *devtype, uint32_t max_mt
 				{
 					TRACEL(LOG_ERROR, "nyx_device_info_get_info failed, using (unknown) as name\n");
 					// Not able to get device name so using "(unknown)"
-					sprintf(retVal, "(unknown)");
+					snprintf(retVal, sizeof(usbll_handle->device_id), "(unknown)");
 				}
 
 				snprintf(usbll_handle->device_id, sizeof(usbll_handle->device_id),

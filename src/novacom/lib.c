@@ -56,8 +56,8 @@ void novacom_nduid_init(void)
 		{
 			// Error value left unchecked on purpose. If NDUID reading fails for
 			// some reason, initialized value is used.
-			nyx_device_info_get_info(device, NYX_DEVICE_INFO_NDUID, nduid,
-			                         NOVACOM_NDUID_STRLEN);
+			(void) nyx_device_info_get_info(device, NYX_DEVICE_INFO_NDUID, nduid,
+			                                NOVACOM_NDUID_STRLEN);
 
 			nyx_device_close(device);
 		}
