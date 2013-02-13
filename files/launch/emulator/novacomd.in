@@ -1,6 +1,6 @@
 #/* @@@LICENSE
 #*
-#*      Copyright (c) 2008-2012 Hewlett-Packard Development Company, L.P.
+#*      Copyright (c) 2008-2013 Hewlett-Packard Development Company, L.P.
 #*
 #* Licensed under the Apache License, Version 2.0 (the "License");
 #* you may not use this file except in compliance with the License.
@@ -29,5 +29,5 @@ env UPSTART_EVENT
 
 script
 	export ip_addr=$(ip route show | grep default | awk '{print $3}')
-	exec @WEBOS_INSTALL_BASE_SBINDIR@/novacomd --connect-ip $ip_addr > /dev/null
+	exec @WEBOS_INSTALL_SBINDIR@/novacomd --connect-ip $ip_addr > /dev/null
 end script
