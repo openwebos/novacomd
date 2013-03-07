@@ -31,6 +31,6 @@ script
 	# On fast machines, virtualbox launches us too quickly and novacomd
 	# fails to start. A 1 second delay fixes that.
 	sleep 1
-	export ip_addr=$(ip route show | grep default | awk '{print $3}')
+	export ip_addr=$(route | grep UG | awk '{print $2}')
 	exec @WEBOS_INSTALL_SBINDIR@/novacomd --connect-ip $ip_addr > /dev/null
 end script
