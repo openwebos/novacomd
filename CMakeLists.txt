@@ -1,6 +1,6 @@
 # @@@LICENSE
 #
-#      Copyright (c) 2008-2013 LG Electronics, Inc.
+#      Copyright (c) 2008-2014 LG Electronics, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,10 +15,6 @@
 # limitations under the License.
 #
 # LICENSE@@@
-
-#
-# novacomd/CMakeLists.txt
-#
 
 cmake_minimum_required(VERSION 2.8.7)
 project(novacomd C)
@@ -48,7 +44,7 @@ if(${WEBOS_TARGET_MACHINE_IMPL} STREQUAL host)
 
 	file(GLOB target_files src/host/*.c)
 	webos_add_compiler_flags(ALL -DHOST=1)
-	set(upstartfile files/launch/host/novacomd)
+	set(upstartfile files/launch/host/novacomd.conf)
 else()
 	pkg_check_modules(NYXLIB REQUIRED nyx)
 	include_directories(${NYXLIB_INCLUDE_DIRS})
@@ -59,9 +55,9 @@ else()
 	webos_add_compiler_flags(ALL -DDEVICE=1)
 
 	if(${WEBOS_TARGET_MACHINE_IMPL} STREQUAL emulator)
-		set(upstartfile files/launch/emulator/novacomd)
+		set(upstartfile files/launch/emulator/novacomd.conf)
 	else()
-		set(upstartfile files/launch/device/novacomd)
+		set(upstartfile files/launch/device/novacomd.conf)
 	endif()
 endif()
 
