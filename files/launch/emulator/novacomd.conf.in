@@ -22,14 +22,25 @@ start on started connman
 respawn
 normal exit 0 TERM
 
-console output
+#console output
+
+env ip_addr=""
+env COUNT=10
 
 script
-	# On fast machines, virtualbox launches us too quickly and novacomd
-	# fails to start. A 3 second delay fixes that.
-	sleep 3
-	export ip_addr=$(route | grep UG | awk '{print $2}')
-	if [ $ip_addr != "" ] ; then
-		exec @WEBOS_INSTALL_SBINDIR@/novacomd --connect-ip $ip_addr > /dev/null
-	fi
+	while [ -z $ip_addr ]
+	do
+		ip_addr=$(route | grep "UG " | awk '{print $2}')
+		if [ $ip_addr != "" ] ; then
+			exec @WEBOS_INSTALL_SBINDIR@/novacomd --connect-ip $ip_addr > /dev/null
+		else
+			echo "novacomd.conf: ip_addr is not set yet: countdown is "$COUNT
+			sleep 1
+		fi
+		COUNT=$((COUNT - 1))
+		if [ $COUNT -eq 0 ] ; then
+			echo "countdown hit zero - exiting"
+			exit 1
+		fi
+	done
 end script
